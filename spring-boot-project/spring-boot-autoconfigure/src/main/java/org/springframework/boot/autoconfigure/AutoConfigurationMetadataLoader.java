@@ -33,26 +33,34 @@ import org.springframework.util.StringUtils;
  */
 final class AutoConfigurationMetadataLoader {
 
+	// 文件中为需要加载的配置类的类路径
 	protected static final String PATH = "META-INF/spring-autoconfigure-metadata.properties";
 
 	private AutoConfigurationMetadataLoader() {
 	}
 
 	static AutoConfigurationMetadata loadMetadata(ClassLoader classLoader) {
+		// 重载方法
 		return loadMetadata(classLoader, PATH);
 	}
 
 	static AutoConfigurationMetadata loadMetadata(ClassLoader classLoader, String path) {
 		try {
+			// 1.读取spring-boot-autoconfigure.jar包中spring-autoconfigure-metadata.properties的信息生成urls枚举对象
+			// 获得 PATH 对应的 URL 们
 			Enumeration<URL> urls = (classLoader != null) ? classLoader.getResources(path)
 					: ClassLoader.getSystemResources(path);
+			// 遍历 URL 数组 读取到 properties 中
 			Properties properties = new Properties();
+			// 2.解析urls枚举对象中的信息封装成properties中
 			while (urls.hasMoreElements()) {
 				properties.putAll(PropertiesLoaderUtils.loadProperties(new UrlResource(urls.nextElement())));
 			}
+			// 将 properties 转换成 PropertiesAutoConfigureMetadata 对象
+
+			// 根据封装好的properties对象生成AutoConfigureMetadata对象返回
 			return loadMetadata(properties);
-		}
-		catch (IOException ex) {
+		} catch (IOException ex) {
 			throw new IllegalArgumentException("Unable to load @ConditionalOnClass location [" + path + "]", ex);
 		}
 	}
@@ -66,6 +74,9 @@ final class AutoConfigurationMetadataLoader {
 	 */
 	private static class PropertiesAutoConfigurationMetadata implements AutoConfigurationMetadata {
 
+		/**
+		 * Properties 对象
+		 */
 		private final Properties properties;
 
 		PropertiesAutoConfigurationMetadata(Properties properties) {
